@@ -10,8 +10,8 @@ let startY = 450;
 let endX = 300;
 let endY = 150;
 
-//steps is the lifespan of all the bugs, this determines the amount of "steps" they can take before they dissappear
-let steps = 1000;
+//dnaLength is the lifespan of all the bugs, this determines the amount of "steps" they can take before they dissappear
+let dnaLength = 1000;
 
 function setup() {
 
@@ -37,26 +37,32 @@ function draw() {
 
     //Drawing all Bugs
 
-    for (var i = 0; i < currentPopulation; i++) {
+    for (var i = 0; i < bugs.length; i++) {
         bugs[i].show();
-        bugs[i].move();
-        
-
-        if (bugs[i].x > 600 || bugs[i].x < 0) {
-            bugs.splice(i, 1);
-            currentPopulation -= 1;
-            break;
+        if (bugs[i].alive == true) {
+            bugs[i].move();
         }
-        else if (bugs[i].y > 600 || bugs[i].y < 0) {
-            bugs.splice(i, 1);
-            currentPopulation -= 1;
-            break;
+
+        if (bugs[i].alive == true) {
+            if (bugs[i].x > 600 || bugs[i].x < 0) {
+                //bugs.splice(i, 1);
+                bugs[i].alive = false;
+                currentPopulation -= 1;
+                break;
+            }
+            else if (bugs[i].y > 600 || bugs[i].y < 0) {
+                //bugs.splice(i, 1);
+                bugs[i].alive = false;
+                currentPopulation -= 1;
+                break;
+            }
         }
 
         //Collision system 
         hit = collideRectCircle(112, 285, 374, 30, bugs[i].x, bugs[i].y, 5);
-        if (hit) {
-            bugs.splice(i, 1);
+        if (hit && bugs[i].alive == true) {
+            //bugs.splice(i, 1);
+            bugs[i].alive = false;
             currentPopulation -= 1;
             break;
         }
@@ -64,7 +70,7 @@ function draw() {
 
     //Drawing static obsticle
     rect(112, 285, 374, 30);
-    console.log(bugs.length);
+    console.log(currentPopulation);
 
 
 }
@@ -74,9 +80,10 @@ class Bug {
         this.x = startX;
         this.y = startY;
         this.counter = 0;
+        this.alive = true;
         this.dna = [];
-        //initialising the DNA with random steps
-        for(var i = 0; i < steps; i++){
+        //initialising the DNA with random dnaLength
+        for (var i = 0; i < dnaLength; i++) {
             this.dna[i] = (Math.random() * 2) - 1;
         }
 
@@ -90,14 +97,28 @@ class Bug {
     }
 
     move() {
-        
-        if(this.counter % 2 == 0){
-            this.x += this.dna[this.counter]*speed;
+        if (this.alive == true) {
+            if (this.counter % 2 == 0 && this.counter <= dnaLength) {
+                this.x += this.dna[this.counter] * speed;
+            }
+            else if (this.counter % 2 == 1 && this.counter <= dnaLength) {
+                this.y += this.dna[this.counter] * speed;
+            }
+            else {
+                this.x = this.x;
+                this.y = this.y;
+            }
+            this.counter++;
+
+            if(this.counter == dnaLength){
+                this.alive = false;
+            }
+
         }
-        else if(this.counter % 2 == 1){
-            this.y += this.dna[this.counter]*speed;
+        else {
+            this.x = this.x;
+            this.y = this.y;
         }
-        this.counter++;
 
         // this.x += ((Math.random() * 2) - 1) * speed;
         // this.y += ((Math.random() * 2) - 1) * speed;
