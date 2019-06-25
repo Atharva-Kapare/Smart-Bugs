@@ -18,6 +18,12 @@ let dnaLength = 1000;
 let generation = 1;
 let newGen = false;
 
+//the closest a bug has gotten to the goal in each generation and it's index in the bugs[] array
+let shortestDistance = 10000;
+let fittest = 1;
+
+
+
 function setup() {
 
     createCanvas(600, 600);
@@ -40,16 +46,18 @@ function draw() {
     fill(0, 0, 0);
 
 
-    if(generation > 1){
-        if(newGen){
+    if (generation > 1) {
+        if (newGen) {
 
-            bugs.splice(0,size);
+            bugs.splice(0, size);
 
             for (let i = 0; i < size; i++) {
                 bugs[i] = new Bug;
             }
             newGen = false;
             counter = 0;
+            currentPopulation = size;
+            shortestDistance = 1000000;
         }
     }
 
@@ -60,7 +68,15 @@ function draw() {
         bugs[i].show();
         if (bugs[i].dead == false) {
             bugs[i].move();
+            bugs[i].goalDistance = dist(bugs[i].x, bugs[i].y, endX, endY);
+            if (bugs[i].goalDistance < bugs[i].minGoalDistance) {
+                bugs[i].minGoalDistance = bugs[i].goalDistance
+            }
         }
+
+
+
+
 
         if (bugs[i].dead == false) {
             if (bugs[i].x > 600 || bugs[i].x < 0) {
@@ -94,13 +110,23 @@ function draw() {
 
     //Drawing static obsticle
     rect(112, 285, 374, 30);
-    console.log(currentPopulation);
+    //console.log(currentPopulation);
 
     //incrementing the generations if the bugs run out of dna
     counter++
-    if(counter == dnaLength){
+    if (counter == dnaLength) {
+        for (var i = 0; i < size; i++) {
+            if (bugs[i].alive == true) {
+                if (bugs[i].minGoalDistance < shortestDistance) {
+                    shortestDistance = bugs[i].minGoalDistance;
+                    fittest = i;
+                }
+            }
+        }
+
+        console.log(shortestDistance);
         newGen = true;
-        generation++;                
+        generation++;
     }
 
 
@@ -113,8 +139,11 @@ class Bug {
         this.counter = 0;
         this.alive = true;
         this.dead = false;
-        this.dna = [];
+        this.goalDistance = 0.0;
+        this.minGoalDistance = 999999;
+
         //initialising the DNA with random dnaLength
+        this.dna = [];
         for (var i = 0; i < dnaLength; i++) {
             this.dna[i] = (Math.random() * 2) - 1;
         }
@@ -142,8 +171,8 @@ class Bug {
             }
             this.counter++;
 
-            if(this.counter == dnaLength){
-                this.dead = true;                
+            if (this.counter == dnaLength) {
+                this.dead = true;
             }
 
         }
