@@ -2,6 +2,7 @@ let bugs = [];
 let size = 100; //the size of the population for each generation
 let currentPopulation = size; //amount of bugs alive at any given time
 let speed = 5; //the speed at which the bugs can move
+let counter = 0; //an integer to keep count of the steps
 
 //start x and y initialise the start point of all the bugs
 //end x and y initialise the goal of the bugs
@@ -12,6 +13,10 @@ let endY = 150;
 
 //dnaLength is the lifespan of all the bugs, this determines the amount of "steps" they can take before they dissappear
 let dnaLength = 1000;
+
+//this is the variable which indicates which generation of bugs we are in
+let generation = 1;
+let newGen = false;
 
 function setup() {
 
@@ -35,24 +40,40 @@ function draw() {
     fill(0, 0, 0);
 
 
+    if(generation > 1){
+        if(newGen){
+
+            bugs.splice(0,size);
+
+            for (let i = 0; i < size; i++) {
+                bugs[i] = new Bug;
+            }
+            newGen = false;
+            counter = 0;
+        }
+    }
+
+
     //Drawing all Bugs
 
     for (var i = 0; i < bugs.length; i++) {
         bugs[i].show();
-        if (bugs[i].alive == true) {
+        if (bugs[i].dead == false) {
             bugs[i].move();
         }
 
-        if (bugs[i].alive == true) {
+        if (bugs[i].dead == false) {
             if (bugs[i].x > 600 || bugs[i].x < 0) {
                 //bugs.splice(i, 1);
                 bugs[i].alive = false;
+                bugs[i].dead = true;
                 currentPopulation -= 1;
                 break;
             }
             else if (bugs[i].y > 600 || bugs[i].y < 0) {
                 //bugs.splice(i, 1);
                 bugs[i].alive = false;
+                bugs[i].dead = true;
                 currentPopulation -= 1;
                 break;
             }
@@ -63,14 +84,24 @@ function draw() {
         if (hit && bugs[i].alive == true) {
             //bugs.splice(i, 1);
             bugs[i].alive = false;
+            bugs[i].dead = true;
             currentPopulation -= 1;
             break;
         }
     }
 
+
+
     //Drawing static obsticle
     rect(112, 285, 374, 30);
     console.log(currentPopulation);
+
+    //incrementing the generations if the bugs run out of dna
+    counter++
+    if(counter == dnaLength){
+        newGen = true;
+        generation++;                
+    }
 
 
 }
@@ -81,6 +112,7 @@ class Bug {
         this.y = startY;
         this.counter = 0;
         this.alive = true;
+        this.dead = false;
         this.dna = [];
         //initialising the DNA with random dnaLength
         for (var i = 0; i < dnaLength; i++) {
@@ -97,7 +129,7 @@ class Bug {
     }
 
     move() {
-        if (this.alive == true) {
+        if (this.dead == false) {
             if (this.counter % 2 == 0 && this.counter <= dnaLength) {
                 this.x += this.dna[this.counter] * speed;
             }
@@ -111,7 +143,7 @@ class Bug {
             this.counter++;
 
             if(this.counter == dnaLength){
-                this.alive = false;
+                this.dead = true;                
             }
 
         }
