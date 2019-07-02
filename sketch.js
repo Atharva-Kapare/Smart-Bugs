@@ -1,13 +1,13 @@
 let bugs = [];
-let size = 100; //the size of the population for each generation
+let size = 500; //the size of the population for each generation
 let currentPopulation = size; //amount of bugs alive at any given time
-let speed = 5; //the speed at which the bugs can move
+let speed = 10; //the speed at which the bugs can move
 let counter = 0; //an integer to keep count of the steps
 
 //start x and y initialise the start point of all the bugs
 //end x and y initialise the goal of the bugs
 let startX = 300;
-let startY = 450;
+let startY = 500;
 let endX = 300;
 let endY = 150;
 
@@ -21,16 +21,22 @@ let newGen = false;
 //the closest a bug has gotten to the goal in each generation and it's index in the bugs[] array
 let shortestDistance = 10000;
 let fittest = 1;
+let fittestBug = [];
+
+//the percent chance that the dna can get changed
+let mutationChance = 0.2;
+let mutationRate = 0.2;
 
 
 
 function setup() {
 
     createCanvas(600, 600);
-    for (let i = 0; i < size; i++) {
+    for (let i = 0; i <= size; i++) {
         bugs[i] = new Bug;
     }
     var hit = false;
+    //frameRate(9999999);
 
 }
 
@@ -51,7 +57,7 @@ function draw() {
 
             bugs.splice(0, size);
 
-            for (let i = 0; i < size; i++) {
+            for (let i = 0; i <= size; i++) {
                 bugs[i] = new Bug;
             }
             newGen = false;
@@ -96,7 +102,7 @@ function draw() {
         }
 
         //Collision system 
-        hit = collideRectCircle(112, 285, 374, 30, bugs[i].x, bugs[i].y, 5);
+        hit = collideRectCircle(112, 285, 250, 30, bugs[i].x, bugs[i].y, 5);
         if (hit && bugs[i].alive == true) {
             //bugs.splice(i, 1);
             bugs[i].alive = false;
@@ -109,7 +115,8 @@ function draw() {
 
 
     //Drawing static obsticle
-    rect(112, 285, 374, 30);
+    rect(112, 285, 250, 30);
+    //rect(112,285,250,30)
     //console.log(currentPopulation);
 
     //incrementing the generations if the bugs run out of dna
@@ -124,7 +131,10 @@ function draw() {
             }
         }
 
-        console.log(shortestDistance);
+        fittestBug = bugs[fittest].dna;
+
+        // console.log(shortestDistance);
+        // console.log(fittestBug);
         newGen = true;
         generation++;
     }
@@ -137,15 +147,28 @@ class Bug {
         this.x = startX;
         this.y = startY;
         this.counter = 0;
+        this.dna = [];
         this.alive = true;
         this.dead = false;
         this.goalDistance = 0.0;
         this.minGoalDistance = 999999;
 
-        //initialising the DNA with random dnaLength
-        this.dna = [];
-        for (var i = 0; i < dnaLength; i++) {
-            this.dna[i] = (Math.random() * 2) - 1;
+        if (generation > 1) {
+            for(var i = 0; i < dnaLength; i++){
+                if (Math.random() <= mutationChance) {
+                    this.dna[i] = Math.random()*fittestBug[i]*mutationRate;//(Math.random() * 2) - 1;
+                }
+                else {
+                    this.dna[i] = fittestBug[i];
+                }
+            }
+            
+        }
+        else {
+            //initialising the DNA with random dnaLength    
+            for (var i = 0; i < dnaLength; i++) {
+                this.dna[i] = (Math.random() * 2) - 1;
+            }
         }
 
         // this.x = Math.floor(Math.random() * 600);
